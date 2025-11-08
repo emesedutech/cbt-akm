@@ -4,8 +4,8 @@ import { QuestionType } from '../../types';
 import type { Question, SingleChoiceQuestion, MultipleChoiceQuestion, MatchingQuestion, ShortAnswerQuestion } from '../../types';
 
 interface QuestionFormProps {
-    initialData: Question | null;
-    onSubmit: (questionData: Question | Omit<Question, 'id'>) => void;
+    initialData: (Question & { correctAnswer?: any }) | null;
+    onSubmit: (questionData: (Question | Omit<Question, 'id'>) & { correctAnswer?: any }) => void;
     onCancel: () => void;
 }
 

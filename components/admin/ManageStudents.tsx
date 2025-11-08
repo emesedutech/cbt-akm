@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// Fix: Import Student type from the types module.
 import type { Student } from '../../types';
 import Modal from '../Modal';
 import StudentForm from './StudentForm';
@@ -34,7 +33,7 @@ const ManageStudents: React.FC<ManageStudentsProps> = ({ students, onAdd, onUpda
         }
         setIsModalOpen(false);
     };
-    
+
     const confirmDelete = () => {
         if (deletingId) {
             onDelete(deletingId);
@@ -45,7 +44,7 @@ const ManageStudents: React.FC<ManageStudentsProps> = ({ students, onAdd, onUpda
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-black">Kelola Data Siswa</h1>
+                <h1 className="text-3xl font-bold text-black">Data Siswa</h1>
                 <button
                     onClick={handleAddClick}
                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
@@ -53,7 +52,7 @@ const ManageStudents: React.FC<ManageStudentsProps> = ({ students, onAdd, onUpda
                     <i className="fas fa-plus mr-2"></i> Tambah Siswa
                 </button>
             </div>
-            
+
             <div className="bg-white p-4 rounded-lg shadow-md">
                 <table className="w-full text-left">
                     <thead>
@@ -79,7 +78,7 @@ const ManageStudents: React.FC<ManageStudentsProps> = ({ students, onAdd, onUpda
                     </tbody>
                 </table>
             </div>
-            
+
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingStudent ? 'Edit Siswa' : 'Tambah Siswa Baru'}>
                 <StudentForm 
                     initialData={editingStudent} 
@@ -89,7 +88,7 @@ const ManageStudents: React.FC<ManageStudentsProps> = ({ students, onAdd, onUpda
             </Modal>
             
             <Modal isOpen={!!deletingId} onClose={() => setDeletingId(null)} title="Konfirmasi Hapus">
-                <p className="text-black">Apakah Anda yakin ingin menghapus siswa ini? Semua data terkait siswa ini akan hilang.</p>
+                <p className="text-black">Apakah Anda yakin ingin menghapus data siswa ini?</p>
                 <div className="flex justify-end gap-4 mt-6">
                     <button onClick={() => setDeletingId(null)} className="px-4 py-2 border rounded-md">Batal</button>
                     <button onClick={confirmDelete} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Ya, Hapus</button>

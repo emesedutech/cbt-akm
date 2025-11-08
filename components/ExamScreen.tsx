@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import type { User, Exam, UserAnswers, Answer } from '../types';
+import type { User, Exam, UserAnswers, Answer, Question } from '../types';
 import Timer from './Timer';
 import QuestionRenderer from './QuestionRenderer';
 import QuestionNavigator from './QuestionNavigator';
@@ -16,6 +16,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
   const [answers, setAnswers] = useState<UserAnswers>({});
   const [timeLeft, setTimeLeft] = useState(exam.durationMinutes * 60);
   const [isFinishModalOpen, setIsFinishModalOpen] = useState(false);
+  const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
 
   // State for resume and auto-save functionality
   const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
@@ -27,7 +28,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
   // State for security features (fullscreen and visibility)
   const [isWarningModalOpen, setIsWarningModalOpen] = useState(false);
 
-  const currentQuestion = exam.questions[currentQuestionIndex];
+  const currentQuestion = shuffledQuestions[currentQuestionIndex];
   const storageKey = `cbt-progress-${user.username}-${exam.id}`;
 
   const initializeEmptyAnswers = useCallback(() => {
@@ -37,6 +38,18 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
     });
     setAnswers(initialAnswers);
   }, [exam.questions]);
+
+  // Effect to shuffle questions on initial load
+  useEffect(() => {
+    const array = [...exam.questions];
+    // Fisher-Yates shuffle algorithm
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    setShuffledQuestions(array);
+  }, [exam.questions]);
+
 
   const enterFullscreen = useCallback(() => {
     document.documentElement.requestFullscreen().catch(err => {
@@ -93,8 +106,8 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
 
   // Effect for auto-saving answers with debounce
   useEffect(() => {
-    if (Object.keys(answers).length === 0) {
-      return; // Don't save initial empty state
+    if (Object.keys(answers).length === 0 || shuffledQuestions.length === 0) {
+      return; // Don't save initial empty state or before questions are shuffled
     }
 
     if (saveTimeoutRef.current) {
@@ -119,7 +132,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [answers, storageKey]);
+  }, [answers, storageKey, shuffledQuestions.length]);
 
   const handleAnswerChange = (questionId: string, answer: Answer) => {
     setAnswers(prev => ({
@@ -139,7 +152,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
   };
 
   const goToQuestion = (index: number) => {
-    if (index >= 0 && index < exam.questions.length) {
+    if (index >= 0 && index < shuffledQuestions.length) {
       setCurrentQuestionIndex(index);
     }
   };
@@ -165,6 +178,15 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
     initializeEmptyAnswers();
     setIsResumeModalOpen(false);
   };
+  
+  if (shuffledQuestions.length === 0) {
+    return (
+        <div className="flex items-center justify-center h-screen">
+            <i className="fas fa-spinner fa-spin text-4xl text-blue-600"></i>
+            <span className="ml-4 text-2xl">Menyiapkan Ujian...</span>
+        </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -175,8 +197,8 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
           <p className="text-sm text-black">Peserta: {user.name} ({user.username})</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="h-6">
-            {saveStatus === 'saving' && <span className="text-sm text-blue-600 flex items-center gap-2 transition-opacity duration-300"><i className="fas fa-spinner fa-spin"></i>Menyimpan...</span>}
+          <div className="h-6 w-48 text-left">
+            {saveStatus === 'saving' && <span className="text-sm text-blue-600 flex items-center gap-2 transition-opacity duration-300"><i className="fas fa-spinner fa-spin"></i>Saving...</span>}
             {saveStatus === 'saved' && <span className="text-sm text-white bg-blue-500 px-2 py-1 rounded-md flex items-center gap-2 transition-opacity duration-300"><i className="fas fa-check-circle"></i>Saved successfully</span>}
           </div>
           <div className="text-center">
@@ -204,7 +226,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
         {/* Navigator Panel */}
         <aside className="w-1/3 max-w-sm p-4 bg-white shadow-lg overflow-y-auto flex flex-col">
           <QuestionNavigator
-            questions={exam.questions}
+            questions={shuffledQuestions}
             answers={answers}
             currentQuestionIndex={currentQuestionIndex}
             onNavigate={goToQuestion}
@@ -238,7 +260,7 @@ const ExamScreen: React.FC<ExamScreenProps> = ({ user, exam, onFinish }) => {
           </button>
           <button
             onClick={() => goToQuestion(currentQuestionIndex + 1)}
-            disabled={currentQuestionIndex === exam.questions.length - 1}
+            disabled={currentQuestionIndex === shuffledQuestions.length - 1}
             className="px-6 py-2 border rounded-md bg-white text-black hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Berikutnya <i className="fas fa-arrow-right ml-2"></i>

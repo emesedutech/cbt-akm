@@ -7,14 +7,14 @@ import QuestionForm from './QuestionForm';
 
 interface ManageQuestionsProps {
     questions: (Question & { correctAnswer?: any })[];
-    onAdd: (question: Omit<Question, 'id'>) => void;
-    onUpdate: (question: Question) => void;
+    onAdd: (question: Omit<Question, 'id'> & { correctAnswer?: any }) => void;
+    onUpdate: (question: Question & { correctAnswer?: any }) => void;
     onDelete: (questionId: string) => void;
 }
 
 const ManageQuestions: React.FC<ManageQuestionsProps> = ({ questions, onAdd, onUpdate, onDelete }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+    const [editingQuestion, setEditingQuestion] = useState<(Question & { correctAnswer?: any }) | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [filterType, setFilterType] = useState<QuestionType | 'all'>('all');
 
@@ -23,16 +23,16 @@ const ManageQuestions: React.FC<ManageQuestionsProps> = ({ questions, onAdd, onU
         setIsModalOpen(true);
     };
 
-    const handleEditClick = (question: Question) => {
+    const handleEditClick = (question: Question & { correctAnswer?: any }) => {
         setEditingQuestion(question);
         setIsModalOpen(true);
     };
 
-    const handleFormSubmit = (questionData: Question | Omit<Question, 'id'>) => {
+    const handleFormSubmit = (questionData: (Question | Omit<Question, 'id'>) & { correctAnswer?: any }) => {
         if ('id' in questionData) {
-            onUpdate(questionData as Question);
+            onUpdate(questionData as Question & { correctAnswer?: any });
         } else {
-            onAdd(questionData);
+            onAdd(questionData as Omit<Question, 'id'> & { correctAnswer?: any });
         }
         setIsModalOpen(false);
     };
