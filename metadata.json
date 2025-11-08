@@ -1,0 +1,5 @@
+{
+  "name": "CBT ANBK/AKM Simulator",
+  "description": "A web-based Computer Based Test (CBT) application that simulates the Indonesian National Assessment (ANBK/AKM). It features an interactive student exam interface with various question types and an admin panel for managing exams, questions, and students.",
+  "requestFramePermissions": []
+}
