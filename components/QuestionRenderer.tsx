@@ -28,7 +28,7 @@ const QuestionText: React.FC<{ text: string; number: number }> = ({ text, number
 const renderSingleChoice = (question: SingleChoiceQuestion, userAnswer: Answer, onAnswerChange: Function) => (
   <div className="space-y-3">
     {question.options.map((option, index) => (
-      <label key={option.id} className="flex items-center p-4 border border-blue-200 rounded-lg cursor-pointer transition-colors hover:bg-blue-50 focus-within:ring-2 focus-within:ring-blue-500">
+      <label key={option.id} className="flex items-center p-4 border border-blue-300 rounded-lg cursor-pointer transition-colors hover:bg-blue-50 focus-within:ring-2 focus-within:ring-blue-500">
         <input
           type="radio"
           name={question.id}
@@ -55,7 +55,7 @@ const renderMultipleChoice = (question: MultipleChoiceQuestion, userAnswer: Answ
     return (
         <div className="space-y-3">
         {question.options.map((option, index) => (
-            <label key={option.id} className="flex items-center p-4 border border-blue-200 rounded-lg cursor-pointer transition-colors hover:bg-blue-50 focus-within:ring-2 focus-within:ring-blue-500">
+            <label key={option.id} className="flex items-center p-4 border border-blue-300 rounded-lg cursor-pointer transition-colors hover:bg-blue-50 focus-within:ring-2 focus-within:ring-blue-500">
                 <input
                     type="checkbox"
                     value={option.id}
@@ -77,33 +77,37 @@ const renderMatching = (question: MatchingQuestion, userAnswer: Answer, onAnswer
         onAnswerChange(question.id, newAnswers);
     };
 
-    // Shuffle matches for display
+    // Shuffle matches for the dropdown options to prevent order bias
     const shuffledMatches = React.useMemo(() => [...question.matches].sort(() => Math.random() - 0.5), [question.matches]);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            <div className="space-y-4">
-                {question.prompts.map((prompt, index) => (
-                <div key={prompt.id} className="flex items-center justify-between p-4 border border-blue-200 bg-blue-50 rounded-lg">
-                    <p className="text-lg text-black">{index + 1}. {prompt.text}</p>
-                    <select
-                        value={currentAnswers[prompt.id] || ''}
-                        onChange={(e) => handleMatchChange(prompt.id, e.target.value)}
-                        className="ml-4 p-2 bg-white border border-blue-300 rounded-md"
-                    >
-                        <option value="">Pilih...</option>
-                        {shuffledMatches.map((match, matchIndex) => (
-                            <option key={match.id} value={match.id}>{String.fromCharCode(65 + matchIndex)}</option>
-                        ))}
-                    </select>
+        <div className="space-y-4 border border-blue-200 rounded-lg p-4 bg-blue-50/50">
+            {question.prompts.map((prompt, index) => (
+                <div key={prompt.id} className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center border-b border-blue-100 pb-4 last:border-b-0 last:pb-0">
+                    {/* Prompt Text */}
+                    <div className="flex items-center">
+                        <span className="font-semibold text-black mr-2">{index + 1}.</span>
+                        <p className="text-lg text-black flex-1">{prompt.text}</p>
+                    </div>
+
+                    {/* Dropdown for Matches */}
+                    <div>
+                        <select
+                            value={currentAnswers[prompt.id] || ''}
+                            onChange={(e) => handleMatchChange(prompt.id, e.target.value)}
+                            className="w-full p-3 bg-white border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 transition"
+                            aria-label={`Jawaban untuk ${prompt.text}`}
+                        >
+                            <option value="" disabled>-- Jodohkan --</option>
+                            {shuffledMatches.map((match) => (
+                                <option key={match.id} value={match.id}>
+                                    {match.text}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-                ))}
-            </div>
-            <div className="space-y-2 p-4 border rounded-lg bg-blue-50">
-                {shuffledMatches.map((match, index) => (
-                <p key={match.id} className="text-lg text-black">{String.fromCharCode(65 + index)}. {match.text}</p>
-                ))}
-            </div>
+            ))}
         </div>
     );
 };
